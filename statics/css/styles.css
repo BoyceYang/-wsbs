@@ -1,0 +1,63 @@
+@charset "utf-8";
+/* CSS Document */
+
+body{ background:url(../img/main_bg.gif) left top; padding:0px; margin:0px;}
+ul,li{ list-style:none; padding:0px; margin:0px;}
+img{border:0px;}
+
+.bg_top{ width:100%; height:600px; background:url(../img/top_bg.jpg) right top; }
+.header_bg{ width:100%; height:151px; background:url(../img/cloud_02.jpg) right top no-repeat; margin:auto;}
+.header{ width:1000px; margin:auto;}
+.header .logo{ width:184px; height:63px; background:url(../img/logo.jpg) left top; display:block; margin:20px auto auto 50px; float:left;display:inline; position:relative; z-index:100;}
+.header .lan{ width:45px; height:30px; float:right; margin-top:25px; background:url(../img/lan.jpg) no-repeat left bottom; display:block;}
+.header .lan:hover{ background-position:left top;}
+.header .en{ background-position:right bottom; margin-top:25px;}
+.header .en:hover{ background-position:right top;}
+
+.page_box{ width:1000px; height:700px; position:relative; margin:auto; margin-top:-450px; z-index:5;}
+.page_box_bg{ background:url(../img/page_06.jpg) center top no-repeat; margin-top:-505px;}
+
+.home_menu{ width:100px; height:51px; position:absolute; right:100px;}
+.home_menu a{ width:100%; height:51px; display:block;}
+
+.index_left{ width:443px; height:646px; background:url(../img/cloud_17.jpg) left bottom no-repeat; float:left;}
+.index_right{ width:488px; height:646px; float:left;}
+.page_left{ width:420px; height:607px; margin:59px auto auto 70px;display:inline;}
+.page_right{width:450px; height:607px; margin:59px auto auto auto; display:inline;}
+.page_right{ background:none;}
+.job_l{ background:url(../img/job_03.jpg) left top; width:435px; height:600px; margin-left:60px;}
+.job_right {text-align:left;}
+.job_right h2{ font-size:18px;}
+
+
+.page_right_menu{ position:absolute; width:79px; height:202px; top:115px; right:-23px;}
+.page_right_menu li{ height:115px; width:79px;}
+.page_right_menu li a{ display:block; width:79px; height:100%; background:url(../img/about_08.png) left top no-repeat;}
+.page_right_menu li a:hover{ display:block; width:79px; height:100%; background:url(../img/about_08_sele.png) left top no-repeat;}
+.page_right_menu .menu_1{ width:79px; height:113px; }
+.page_right_menu .menu_1 a{ background-position:left -115px;}
+.page_right_menu .menu_1 a.on{background-position:left -115px;}
+.page_right_menu .menu_1 a:hover{ background-position:left -115px;}
+.page_right_menu .menu_2{ width:74px; height:100px;}
+.page_right_menu .menu_2 a{ background-position:left -310px;}
+.page_right_menu .menu_2 a.on{background-position:left -310px;}
+.page_right_menu .menu_2 a:hover{ background-position:left -310px;}
+
+.page_bot{ width:100%; height:200px; background:url(../img/page_09.jpg) center top no-repeat; position:absolute; z-index:1; top:601px; left:0px;}
+
+.footer{ width:1000px; margin:auto;position:relative; z-index:2; }
+.footer_left{ float:left;margin:30px auto auto auto; }
+.footer_left a{ width:45px; height:39px; background:url(../img/foot_bg.JPG) left top; float:left; display:block; margin-right:5px;}
+.footer_left .sina{ float:left; background-position:-5px -20px;}
+.footer_left .taobao{ float:left; background-position:-55px -20px;}
+.footer_left .douban{ float:left; background-position:-105px -20px;}
+.footer_right{ float:right; height:73px; background:url(../img/foot_bg.JPG) no-repeat right top; width:444px;}
+.footer_right p{ font-size:12px; float:right; margin-top:40px; margin-right:15px; color:#8a6249; display:inline;font-family:Verdana, Geneva, sans-serif;}
+.footer_right a{ color:#8a6249;}
+.footer_left .link{ float:left; width:65px; height:40px;}
+.footer_left .link a{ height:20px; width:100%; display:block;}
+.footer_left .link .contact{ background:url(../img/foot_bg.JPG) no-repeat -160px -20px;}
+.footer_left .link .linker{ background:url(../img/foot_bg.JPG) no-repeat -160px -38px;}
+
+.job_right {text-align:left;}
+.job_right h2{ font-size:18px;}
