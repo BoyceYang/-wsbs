@@ -1,24 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-import uuid
-import logging
-import urlparse
-import requests
-
 import gevent
+from gevent import monkey
+monkey.patch_all()
 from gevent import queue
 from gevent import Greenlet
 from gevent import event
 from gevent import Timeout
 from gevent import pool
 from gevent import threadpool
-from gevent import monkey
+
+import os
+import uuid
+import logging
+import urlparse
+import requests
 
 from exceptions import *
-
-monkey.patch_all()
 
 from cache import UrlCache, UrlData
 from utils import HtmlAnalyzer, monkey_patch, to_unicode
@@ -322,7 +321,7 @@ class Spider(object):
 
 
 if __name__ == '__main__':
-    spider = Spider(concurrent_num=20, depth=5, max_url_num=300, crawler_mode=0, dynamic_parse=False)
+    spider = Spider(concurrent_num=1, depth=5, max_url_num=300, crawler_mode=0, dynamic_parse=False)
     url = "www.baidu.com"
     spider.feed_url(url)
     spider.start()
