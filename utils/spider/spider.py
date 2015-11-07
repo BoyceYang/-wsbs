@@ -321,7 +321,7 @@ class Spider(object):
 
 
 if __name__ == '__main__':
-    spider = Spider(concurrent_num=1, depth=5, max_url_num=300, crawler_mode=0, dynamic_parse=False)
-    url = "www.baidu.com"
+    spider = Spider(concurrent_num=20, depth=5, max_url_num=300, crawler_mode=0, dynamic_parse=False)
+    url = "http://blog.csdn.net/"
     spider.feed_url(url)
     spider.start()
