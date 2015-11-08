@@ -171,7 +171,7 @@ class Spider(object):
 
         self.plugin_handler = plugin   # 注册Crawler中使用的插件
         self.custom_headers = custom_headers
-        self.unspider_url_list = list()
+        self.unspider_url_list = []
         self.spider_type = spider_type
 
     def _start_fetcher(self):
@@ -215,11 +215,13 @@ class Spider(object):
         if self.dynamic_parse:
             self.webkit.close()
 
-        redis_key = IMG_UNSPIDER_URL_KEY
+        unspider_url_list = list(set(self.unspider_url_list))          # 对未访问的list进行去重
+        unspider_url_list.sort(key=self.unspider_url_list.index)
+        redis_key = IMG_UNSPIDER_URL_KEY         # redis_key控制spider检索的数据类型
 
         try:
             with global_redis.pipeline() as pipe:
-                pipe.lpush(redis_key, *self.unspider_url_list).ltrim(redis_key, 0, 100).expire(redis_key, 72000).execute()
+                pipe.lpush(redis_key, *unspider_url_list).ltrim(redis_key, 0, 100).expire(redis_key, 72000).execute()
         except:
             logging.info("store unspider url error!!")
             pass

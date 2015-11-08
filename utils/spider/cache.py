@@ -74,6 +74,6 @@ class UrlCache(object):
         if len(link_list):
             try:
                 with global_redis.pipeline() as pipe:
-                    pipe.lpush(SPIDER_IMG_KEY, *link_list).expire(SPIDER_IMG_KEY, 72000).execute()
+                    pipe.sadd(SPIDER_IMG_KEY, *link_list).expire(SPIDER_IMG_KEY, 72000).execute()
             except:
                 return
