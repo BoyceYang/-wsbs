@@ -220,11 +220,13 @@ class Spider(object):
         redis_key = IMG_UNSPIDER_URL_KEY         # redis_key控制spider检索的数据类型
 
         try:
-            with global_redis.pipeline() as pipe:
-                pipe.lpush(redis_key, *unspider_url_list).ltrim(redis_key, 0, 100).expire(redis_key, 72000).execute()
+            for url_link in unspider_url_list:
+                with global_redis.pipeline() as pipe:
+                    pipe.lpush(redis_key, url_link).ltrim(redis_key, 0, 100).expire(redis_key, 72000).execute()
         except:
             logging.info("store unspider url error!!")
             pass
+
         logging.info("crawler_cache:%s fetcher_cache:%s" % (len(self.crawler_cache), len(self.fetcher_cache)))
         logging.info("spider process quit.")
 
