@@ -30,6 +30,10 @@ except Exception, e:
     pass
 
 
+from srvconf import IMG_UNSPIDER_URL_KEY
+from dbmanager import global_redis
+
+
 class Fetcher(Greenlet):
     """抓取器"""
     def __init__(self, spider):
@@ -41,6 +45,8 @@ class Fetcher(Greenlet):
         self.crawler_cache = self.spider.crawler_cache
         self.fetcher_queue = self.spider.fetcher_queue
         self.crawler_queue = self.spider.crawler_queue
+        self.unspider_url_list = self.spider.unspider_url_list
+        self.spider_type = self.spider.spider_type
 
     def _fetcher(self):
         logging.info("Fetcher %s Starting..." % self.fetcher_id)
@@ -68,10 +74,15 @@ class Fetcher(Greenlet):
                             url_data.html = html
                             if not self.spider.crawler_stopped.isSet():
                                 self.crawler_queue.put(url_data, block=True)
+                            else:
+                                # 存储未遍历的url
+                                self.unspider_url_list.append(url_data.url)
                             self.crawler_cache.insert(url_data)
+                            self.crawler_cache.store_content(html, url_data.url, self.spider_type)
                     except Exception, e:
                         import traceback
                         traceback.print_exc()
+                self.spider.fetcher_queue.task_done()
 
     def _open(self, url_data):
         human_headers = {
@@ -124,7 +135,8 @@ class Spider(object):
         dynamic_parse     : 是否使用WebKit动态解析
     """
     def __init__(self, concurrent_num=20, crawl_tags=[], custom_headers={}, plugin=[], depth=3, max_url_num=300,
-                 internal_timeout=60, spider_timeout=6*3600, crawler_mode=0, same_origin=True, dynamic_parse=False):
+                 internal_timeout=60, spider_timeout=6*3600, crawler_mode=0, same_origin=True, dynamic_parse=False,
+                 spider_type='img'):
         self.stopped = event.Event()
         self.internal_timeout = internal_timeout
         self.internal_timer = Timeout(internal_timeout)
@@ -132,11 +144,13 @@ class Spider(object):
         self.crawler_mode = crawler_mode             # 爬取器模型
         self.concurrent_num = concurrent_num
         self.fetcher_pool = pool.Pool(self.concurrent_num)                  # 运行的进程数目
+
         if self.crawler_mode == 0:
             self.crawler_pool = threadpool.ThreadPool(min(50, self.concurrent_num))
         else:
             self.crawler_pool = pool.Pool(self.concurrent_num)
 
+        # self.crawler_pool = []
         self.fetcher_queue = threadpool.Queue(maxsize=self.concurrent_num*10000)
         self.crawler_queue = threadpool.Queue(maxsize=self.concurrent_num*10000)
 
@@ -157,6 +171,8 @@ class Spider(object):
 
         self.plugin_handler = plugin   # 注册Crawler中使用的插件
         self.custom_headers = custom_headers
+        self.unspider_url_list = list()
+        self.spider_type = spider_type
 
     def _start_fetcher(self):
         for i in xrange(self.concurrent_num):
@@ -166,6 +182,7 @@ class Spider(object):
     def _start_crawler(self):
         for _ in xrange(self.concurrent_num):
             self.crawler_pool.spawn(self.crawler)
+        # self.crawler_pool = [gevent.spawn(self.crawler) for _ in xrange(self.concurrent_num)]
 
     def start(self):
         logging.info("spider starting...")
@@ -183,10 +200,12 @@ class Spider(object):
         try:
             self.internal_timer.start()
             self.fetcher_pool.join(timeout=self.internal_timer)
+
             if self.crawler_mode == 1:
                 self.crawler_pool.join(timeout=self.internal_timer)
             else:
                 self.crawler_pool.join()
+
         except Timeout:
             logging.error("internal timeout triggered")
         finally:
@@ -195,6 +214,15 @@ class Spider(object):
         self.stopped.clear()
         if self.dynamic_parse:
             self.webkit.close()
+
+        redis_key = IMG_UNSPIDER_URL_KEY
+
+        try:
+            with global_redis.pipeline() as pipe:
+                pipe.lpush(redis_key, *self.unspider_url_list).ltrim(redis_key, 0, 100).expire(redis_key, 72000).execute()
+        except:
+            logging.info("store unspider url error!!")
+            pass
         logging.info("crawler_cache:%s fetcher_cache:%s" % (len(self.crawler_cache), len(self.fetcher_cache)))
         logging.info("spider process quit.")
 
@@ -214,6 +242,7 @@ class Spider(object):
                 curr_depth = pre_depth+1
                 link_generator = HtmlAnalyzer.extract_links(url_data.html, url_data.url, self.crawl_tags)
                 link_list = [url for url in link_generator]
+
                 if self.dynamic_parse:
                     link_generator = self.webkit.extract_links(url_data.url)
                     link_list.extend([url for url in link_generator])
@@ -227,7 +256,6 @@ class Spider(object):
                         else:
                             self.crawler_stopped.set()
                             break
-
                     if len(self.fetcher_cache) == self.max_url_num:   # 最大收集URL数量判断
                         if self.crawler_stopped.isSet():
                             break
@@ -306,7 +334,7 @@ class Spider(object):
         for greenlet in list(self.fetcher_pool):
             if greenlet.dead:
                 self.fetcher_pool.discard(greenlet)
-        for i in xrange(min(self.fetcher_queue.qsize(),self.fetcher_pool.free_count())):
+        for i in xrange(min(self.fetcher_queue.qsize(), self.fetcher_pool.free_count())):
             fetcher = Fetcher(self)
             self.fetcher_pool.start(fetcher)
 
@@ -321,7 +349,7 @@ class Spider(object):
 
 
 if __name__ == '__main__':
-    spider = Spider(concurrent_num=20, depth=5, max_url_num=300, crawler_mode=0, dynamic_parse=False)
-    url = "http://blog.csdn.net/"
+    spider = Spider(concurrent_num=5, depth=3, max_url_num=300, crawler_mode=0, dynamic_parse=False)
+    url = "http://image.baidu.com/"
     spider.feed_url(url)
     spider.start()

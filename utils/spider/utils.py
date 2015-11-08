@@ -59,7 +59,6 @@ class HtmlAnalyzer(object):
         if not html.strip():
             return
 
-        link_list = []
         try:
             doc = H.document_fromstring(html)
         except Exception, e:
